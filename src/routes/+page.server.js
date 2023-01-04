@@ -1,16 +1,15 @@
-let todos = [{
-    id: 0,
-    title: 'title',
-    description: 'description',
-    done: false,
-}, {
-    id: 1,
-    title: 'title 2',
-    description: 'description 2',
-    done: true,
-}];
+export function load({
+    cookies
+}) {
+    let todos = cookies.get('todos');
 
-export function load() {
+    if (!todos) {
+        cookies.set('todos', '[]');
+        todos = '[]';
+    }
+
+    todos = JSON.parse(todos);  
+
     return {
         todos
     };
@@ -18,8 +17,18 @@ export function load() {
 
 export const actions = {
     add: async ({
+        cookies,
         request
     }) => {
+        let todos = cookies.get('todos');
+
+        if (!todos) {
+            cookies.set('todos', JSON.stringify([]));
+            todos = [];
+        }
+
+        todos = JSON.parse(todos);  
+
         const data = await request.formData();
         todos = [...todos, {
             id: +new Date(),
@@ -27,19 +36,45 @@ export const actions = {
             description: data.get('description'),
             done: false,
         }];
-        console.log(todos);
+
+        cookies.set('todos', JSON.stringify(todos));
     },
     toggle: async ({
+        cookies,
         request
     }) => {
-        const data = await request.formData();
-        const todoIndex = todos.findIndex((t) => t.id === Number(data.get('id')));
-        todos[todoIndex].done = !todos[todoIndex].done;
+        let todos = cookies.get('todos');
+
+        if (!todos) {
+            cookies.set('todos', JSON.stringify([]));
+            todos = [];
+        } else {
+            todos = JSON.parse(todos);  
+
+            const data = await request.formData();
+            const todoIndex = todos.findIndex((t) => t.id === Number(data.get('id')));
+
+            todos[todoIndex].done = !todos[todoIndex].done;
+            cookies.set('todos', JSON.stringify(todos));
+        }
     },
     delete: async ({
+        cookies,
         request
     }) => {
-        const data = await request.formData();
-        todos = todos.filter((t) => t.id !== Number(data.get('id')));
+        let todos = cookies.get('todos');
+
+        if (!todos) {
+            cookies.set('todos', JSON.stringify([]));
+            todos = [];
+        } else {
+            todos = JSON.parse(todos);  
+
+            const data = await request.formData();
+
+            todos = todos.filter((t) => t.id !== Number(data.get('id')));
+
+            cookies.set('todos', JSON.stringify(todos));
+        }
     },
 }
