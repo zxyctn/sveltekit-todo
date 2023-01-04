@@ -4,7 +4,7 @@ export function load({
     let todos = cookies.get('todos');
 
     if (!todos) {
-        cookies.set('todos', '[]');
+        cookies.set('todos', JSON.stringify([]));
         todos = '[]';
     }
 
